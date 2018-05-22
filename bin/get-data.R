@@ -74,23 +74,57 @@ aggregate_station_data <- function(data, station) {
   return(aggregated_data)
 }
 
+write_station_data <- function(data, output_dir, year, station) {
+  create_dir <- function(directory) {
+    ifelse(!dir.exists(directory), dir.create(directory), FALSE)
+  }
+
+  # create the output directory structure
+  create_dir(output_dir)
+  output_dir_for_year <- paste(output_dir, year, sep = "/")
+  create_dir(output_dir_for_year)
+
+  out_file_name <- sprintf("%s/%s.csv", output_dir_for_year, station)
+  write.csv(data, file = out_file_name)
+}
+format
+process_station_for_year <- function(noaa_ftp, output_dir, year, station, verbose=FALSE) {
+  if (verbose) {
+    print(sprintf("processing year %s station %s", year, station))
+  }
+  year_url <- make_year_url(noaa_ftp, year)
+
+  station_file_name <- station
+  station_name <- make_station_name(station_file_name)
+  station_url <- make_station_url(year_url, station_file_name)
+
+  local_file_name <- download_station_file(station_url)
+  station_data <- load_station_data(local_file_name)
+  final_data <- aggregate_station_data(station_data, station_name)
+  write_station_data(final_data, output_dir, year, station_name)
+}
+
+get_years_to_process <- function(noaa_ftp, output_dir) {
+  years <- fetch_years(noaa_ftp)
+  not_processed <- setdiff(years, list.files(output_dir))
+  return(not_processed)
+}
+
+get_stations_to_process <- function(noaa_ftp, year) {
+  year_url <- make_year_url(noaa_ftp, year)
+  station_files <- get_station_list(year_url)
+  return(station_files)
+}
 
 noaa_ftp <- "ftp://ftp.ncdc.noaa.gov/pub/data/noaa/isd-lite/"
-year_i <- 90
-station_file_i <- 25
+output_dir <- "noaa_data"
 
-years <- fetch_years(noaa_ftp)
-print(years)
+station_file_i <- 1
 
-year <- years[year_i]
-year_url <- make_year_url(noaa_ftp, year)
-station_files <- get_station_list(year_url)
-
-station_file_name <- station_files[station_file_i]
-station_url <- make_station_url(year_url, station_file_name)
-station_name <- make_station_name(station_file_name)
-station_url <- make_station_url(year_url, station_file_name)
-
-local_file_name <- download_station_file(station_url)
-station_data <- load_station_data(local_file_name)
-final_data <- aggregate_station_data(station_data, station_name)
+years <- get_years_to_process(noaa_ftp, output_dir)
+for (year in years) {
+  station_files <- get_stations_to_process(noaa_ftp, year)
+  for (station_name in station_files[station_file_i]) {
+    process_station_for_year(noaa_ftp, output_dir, year, station_file_name, verbose=TRUE)
+  }
+}
