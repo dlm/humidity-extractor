@@ -1,8 +1,8 @@
-require("RCurl")
-require("weathermetrics")
+library("RCurl")
+library("weathermetrics")
 
 fetch_years <- function(url) {
-  url_data <- getURL(url, verbose=TRUE, ftp.use.epsv=TRUE, dirlistonly=TRUE)
+  url_data <- RCurl::getURL(url, ftp.use.epsv=TRUE, dirlistonly=TRUE)
   files <- strsplit(url_data, "\n")[[1]]
   files_as_numbers <- as.numeric(files)
   years <- as.character(files_as_numbers[!is.na(files_as_numbers)])
@@ -15,7 +15,9 @@ make_year_url <- function(url, year) {
 }
 
 get_station_list <- function(url, file_loc=9) {
-  url_data <- getURL(url, verbose=TRUE, ftp.use.epsv=TRUE)
+  # If using getURL doesn't work reliably, check out
+  # this stack overflow post https://goo.gl/HZp3qP
+  url_data <- RCurl::getURL(url, ftp.use.epsv=TRUE)
   files <- strsplit(url_data, "\n")[[1]]
   ss <- strsplit(files, "\\s+")
   file_names <- rapply(ss, function(x) { x[file_loc] })
@@ -52,7 +54,7 @@ load_station_data <- function(path, sentinal=-9999) {
   data$date <- sprintf("%4d-%02d-%02d", data$year, data$month, data$day)
   data$air_temp <- data$air_temp / 10.0
   data$dew_point <- data$dew_point / 10.0
-  data$relative_humidity <-  dewpoint.to.humidity(
+  data$relative_humidity <- weathermetrics::dewpoint.to.humidity(
     t = data$air_temp,
     dp = data$dew_point,
     temperature.metric = 'celsius'
