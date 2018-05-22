@@ -34,7 +34,7 @@ make_station_name <- function(file_name) {
 
 download_station_file <- function(url) {
   dst <- paste(tempfile(), ".gz", sep = "")
-  download.file(station_url, dst)
+  download.file(url, dst)
   return(dst)
 }
 
