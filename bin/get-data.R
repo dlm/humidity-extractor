@@ -119,12 +119,10 @@ get_stations_to_process <- function(noaa_ftp, year) {
 noaa_ftp <- "ftp://ftp.ncdc.noaa.gov/pub/data/noaa/isd-lite/"
 output_dir <- "noaa_data"
 
-station_file_i <- 1
-
 years <- get_years_to_process(noaa_ftp, output_dir)
 for (year in years) {
   station_files <- get_stations_to_process(noaa_ftp, year)
-  for (station_name in station_files[station_file_i]) {
-    process_station_for_year(noaa_ftp, output_dir, year, station_file_name, verbose=TRUE)
+  for (station_name in station_files) {
+    process_station_for_year(noaa_ftp, output_dir, year, station_name, verbose=TRUE)
   }
 }
