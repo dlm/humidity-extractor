@@ -1,6 +1,7 @@
 # Humidity Extractor
 
-A simple script to help get humidity values form the NOAA website.
+- get-data.R: A simple script to help get humidity values form the NOAA website.
+- concat-data: A simple script to concat files
 
 # Requirements
 
