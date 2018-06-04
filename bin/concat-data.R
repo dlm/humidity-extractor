@@ -1,6 +1,13 @@
 append_file <- function(out_fname, x, first) {
   x_data <- read.csv(x)
-  write.table(x_data, out_fname, append=!first, col.names=first, row.names=FALSE)
+  write.table(
+    x_data,
+    out_fname,
+    append=!first,
+    col.names=first,
+    row.names=FALSE,
+    sep=","
+  )
 }
 
 
